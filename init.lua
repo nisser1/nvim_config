@@ -25,6 +25,14 @@ vim.opt.clipboard = 'unnamedplus' --可以和当前系统交互
 vim.opt.mouse = "iv" --只有普通模式可以用鼠标copy内容，insert和visual模式不可以
 
 -- ==============================
+-- 2. 加载自定义配置模块 
+-- ==============================
+-- 诊断配置：控制LSP错误/警告标记的显示（E/W等）
+-- 默认禁用显示标记，但仍保持LSP功能（如自动补全、跳转定义等）
+-- 可通过命令临时切换：:DiagnosticsEnable/:DiagnosticsDisable/:DiagnosticsToggle
+require("config.diagnostics")
+
+-- ==============================
 -- 3. 初始化 Lazy.nvim 并加载插件
 -- ==============================
 local plugins = require("plugins").plugins
