@@ -35,6 +35,8 @@ require("config.basic")
 -- 可通过命令临时切换：:DiagnosticsEnable/:DiagnosticsDisable/:DiagnosticsToggle
 require("config.diagnostics")
 
+-- 其他配置...
+
 -- ==============================
 -- 3. 初始化 Lazy.nvim 并加载插件
 -- ==============================
