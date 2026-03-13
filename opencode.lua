@@ -65,6 +65,11 @@ return {
               -- 在终端窗口中查找输入提示符，如果可用则进入插入模式
               if buftype == 'terminal' then
                 vim.cmd('startinsert!')
+                -- 在终端模式下添加快捷键用于窗口导航
+                vim.keymap.set("t", "<C-h>", "<C-\\><C-N><C-w>h", { desc = "Go to left window" })
+                vim.keymap.set("t", "<C-l>", "<C-\\><C-N><C-w>l", { desc = "Go to right window" })
+                vim.keymap.set("t", "<C-j>", "<C-\\><C-N><C-w>j", { desc = "Go to bottom window" })
+                vim.keymap.set("t", "<C-k>", "<C-\\><C-N><C-w>k", { desc = "Go to top window" })
               end
               break
             end
@@ -82,15 +87,20 @@ return {
           local bufname = vim.api.nvim_buf_get_name(buf)
           local buftype = vim.api.nvim_buf_get_option(buf, 'buftype')
           
-          -- 尝试匹配 OpenCode 输入相关窗口
-          if bufname:match('opencode') or bufname:match('chat') or buftype == 'terminal' then
-            vim.api.nvim_set_current_win(win)
-            
-            -- 判断窗口类型，如果是终端则进入插入模式
-            if buftype == 'terminal' then
-              vim.cmd('startinsert!')
-            end
-            break
+             -- 尝试匹配 OpenCode 输入相关窗口
+             if bufname:match('opencode') or bufname:match('chat') or buftype == 'terminal' then
+               vim.api.nvim_set_current_win(win)
+               
+               -- 判断窗口类型，如果是终端则进入插入模式
+               if buftype == 'terminal' then
+                 vim.cmd('startinsert!')
+                 -- 在终端模式下添加快捷键用于窗口导航
+                 vim.keymap.set("t", "<C-h>", "<C-\\><C-N><C-w>h", { desc = "Go to left window" })
+                 vim.keymap.set("t", "<C-l>", "<C-\\><C-N><C-w>l", { desc = "Go to right window" })
+                 vim.keymap.set("t", "<C-j>", "<C-\\><C-N><C-w>j", { desc = "Go to bottom window" })
+                 vim.keymap.set("t", "<C-k>", "<C-\\><C-N><C-w>k", { desc = "Go to top window" })
+               end
+               break
           end
         end
       end,                          
@@ -119,6 +129,12 @@ return {
       function() require("opencode").toggle() end,                          
       { desc = "Toggle OpenCode" })
       
+
+    -- 在终端模式下添加快捷键用于窗口导航（全局设置，避免遗漏情况）
+    vim.keymap.set("t", "<C-h>", "<C-\\><C-N><C-w>h", { desc = "Go to left window" })
+    vim.keymap.set("t", "<C-l>", "<C-\\><C-N><C-w>l", { desc = "Go to right window" })
+    vim.keymap.set("t", "<C-j>", "<C-\\><C-N><C-w>j", { desc = "Go to bottom window" })
+    vim.keymap.set("t", "<C-k>", "<C-\\><C-N><C-w>k", { desc = "Go to top window" })
 
   end
 }
