@@ -25,8 +25,8 @@ return {
     -- 为 gtags 设置键盘映射
     local opts = { noremap = true, silent = true }
 
-    -- 定义辅助函数以检查gtags是否存在
-    local function check_gtags_and_run(cmd)
+    -- 定义辅助函数以检查gtags是否存在，并安全执行命令
+    local function check_gtags_and_run(cmd_suffix)
       local gtags_available = vim.fn.executable('gtags') == 1
       local gtags_files_exist =
         vim.fn.filereadable('GTAGS') == 1 and
@@ -43,19 +43,22 @@ return {
         return
       end
       
+      local cword = vim.fn.expand('<cword>')
+      
       -- 执行原命令
-      vim.cmd(cmd)
+      local full_cmd = ":Gtags " .. cmd_suffix .. " " .. cword
+      vim.cmd(full_cmd)
     end
 
     -- 启用gtags专用映射
-    vim.keymap.set("n", "<leader>gd", function() check_gtags_and_run(":Gtags -d " .. vim.fn.expand('<cword>')) end, opts) -- 跳转到定义
-    vim.keymap.set("n", "<leader>gr", function() check_gtags_and_run(":Gtags -r " .. vim.fn.expand('<cword>')) end, opts) -- 查看引用
-    vim.keymap.set("n", "<leader>gS", function() check_gtags_and_run(":Gtags -s " .. vim.fn.expand('<cword>')) end, opts) -- 查找符号
-    vim.keymap.set("n", "<leader>gf", function() check_gtags_and_run(":Gtags -f " .. vim.fn.expand('<cword>')) end, opts) -- 查找文件
-    vim.keymap.set("n", "<leader>gi", function() check_gtags_and_run(":Gtags -gi " .. vim.fn.expand('<cword>')) end, opts) -- 查找导入
-    vim.keymap.set("n", "<leader>gl", ":lopen<CR>", opts)                                -- 打开位置列表
-    vim.keymap.set("n", "<leader>g]", ":lnext<CR>", opts)                               -- 下一个结果
-    vim.keymap.set("n", "<leader>g[", ":lprev<CR>", opts)                               -- 上一个结果
+    vim.keymap.set("n", "<leader>gd", function() check_gtags_and_run("-d") end, opts) -- 跳转到定义
+    vim.keymap.set("n", "<leader>gr", function() check_gtags_and_run("-r") end, opts) -- 查看引用
+    vim.keymap.set("n", "<leader>gS", function() check_gtags_and_run("-s") end, opts) -- 查找符号
+    vim.keymap.set("n", "<leader>gf", function() check_gtags_and_run("-f") end, opts) -- 查找文件
+    vim.keymap.set("n", "<leader>gi", function() check_gtags_and_run("-gi") end, opts) -- 查找导入
+    vim.keymap.set("n", "<leader>gl", ":lopen<CR>", opts)                             -- 打开位置列表
+    vim.keymap.set("n", "<leader>g]", ":lnext<CR>", opts)                            -- 下一个结果
+    vim.keymap.set("n", "<leader>g[", ":lprev<CR>", opts)                            -- 上一个结果
 
 
     -- 通用后退功能
