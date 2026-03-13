@@ -12,6 +12,11 @@ vim.opt.signcolumn = "yes"         -- Always show sign column to prevent shiftin
 -- Basic editor settings from .vimrc
 vim.opt.hlsearch = true            -- Highlight search results
 vim.opt.wrap = false               -- Don't wrap lines
+vim.opt.cursorline = true          -- Highlight current cursor line
+vim.opt.showmatch = true           -- Highlight matching brackets
+vim.opt.ignorecase = true          -- Case insensitive search...
+vim.opt.smartcase = true           -- ...but case sensitive if uppercase letters are used
+vim.opt.incsearch = true           -- Incremental search
 
 -- Color and display settings
 vim.opt.syntax = "enable"  -- Enable syntax highlighting
