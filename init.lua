@@ -1,16 +1,38 @@
-local M = {}
+-- 设置 leader 键为逗号，以避免与其他组合键冲突
+vim.g.mapleader = ","  -- 将 leader 键设置为逗号
+vim.g.maplocalleader = "\\"  -- 使用反斜杠作为局部 leader 键
 
--- 返回合并后的插件列表
-M.plugins = {
-  require("plugins.opencode"),
-  require("plugins.treesitter"),
-  require("plugins.lspconfig"),
-  require("plugins.mason"),
-  require("plugins.telescope"),
-  require("plugins.cmp"),
-  require("plugins.colorscheme"),
-  require("plugins.gitsigns"),
-  require("plugins.ctags"),
-}
+-- ==============================
+-- 1. 引导 Lazy.nvim 安装与加载
+-- ==============================
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
-return M
+-- 自动安装 Lazy.nvim（如果不存在）
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+
+-- 把 Lazy.nvim 加入 runtimepath
+vim.opt.rtp:prepend(lazypath)
+vim.opt.clipboard = 'unnamedplus' --可以和当前系统交互
+vim.opt.mouse = "iv" --只有普通模式可以用鼠标copy内容，insert和visual模式不可以
+
+-- ==============================
+-- 3. 初始化 Lazy.nvim 并加载插件
+-- ==============================
+local plugins = require("plugins").plugins
+require("lazy").setup(plugins, {
+  git = {
+    timeout = 30000, -- 30秒超时（默认 5 秒）
+  },
+})
+
+
+

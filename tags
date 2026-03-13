@@ -1,0 +1,22 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+M.setup	lua/plugins/ctags.lua	/^function M.setup()$/;"	f
+auto_generate_tags	lua/plugins/ctags.lua	/^  local function auto_generate_tags()$/;"	f
+build 	lua/plugins/treesitter.lua	/^  build = function()$/;"	f
+callback 	lua/plugins/ctags.lua	/^    callback = function()$/;"	f
+config 	lua/plugins/cmp.lua	/^  config = function()$/;"	f
+config 	lua/plugins/colorscheme.lua	/^  config = function()$/;"	f
+config 	lua/plugins/gitsigns.lua	/^  config = function()$/;"	f
+config 	lua/plugins/lspconfig.lua	/^  config = function()$/;"	f
+config 	lua/plugins/mason.lua	/^  config = function()$/;"	f
+config 	lua/plugins/telescope.lua	/^  config = function()$/;"	f
+config 	lua/plugins/treesitter.lua	/^  config = function()$/;"	f
+expand 	lua/plugins/cmp.lua	/^        expand = function(args)$/;"	f
+if ft_to_lang_type 	lua/plugins/treesitter.lua	/^      if ft_to_lang_type == "function" then$/;"	f
+local on_attach 	lua/plugins/lspconfig.lua	/^    local on_attach = function(client, bufnr)$/;"	f
+on_attach 	lua/plugins/gitsigns.lua	/^      on_attach = function(bufnr)$/;"	f
+on_exit 	lua/plugins/ctags.lua	/^      on_exit = function(_, exit_code)$/;"	f
