@@ -1,0 +1,113 @@
+return {
+  'neovim/nvim-lspconfig',
+  dependencies = {
+    'williamboman/mason.nvim',
+    'williamboman/mason-lspconfig.nvim',
+  },
+  config = function()
+    -- 确保Mason已经安装并准备就绪
+    require('mason').setup()
+
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    if pcall(require, 'cmp_nvim_lsp') then
+      capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+    end
+
+    -- 创建一个全局检查函数来确保on_attach被调用
+    local on_attach = function(client, bufnr)
+      -- 注释掉显示信息，因为在某些场景下这可能会影响性能
+      -- vim.api.nvim_echo({{"LSP server (" .. client.name .. ") successfully attached to buffer " .. bufnr}}, false, {})
+      
+      local opts = { buffer = bufnr, noremap = true, silent = true }
+
+      -- 定义LSP函数包装，带错误输出
+      local function lsp_definition()
+        -- 使用pcall捕获任何错误
+        local success, err = pcall(vim.lsp.buf.definition)
+        if not success then
+          vim.api.nvim_echo({{"LSP definition ERROR: " .. tostring(err)}}, true, {})
+        end
+      end
+
+      local function lsp_references()
+        local success, err = pcall(vim.lsp.buf.references)
+        if not success then
+          vim.api.nvim_echo({{"LSP references ERROR: " .. tostring(err)}}, true, {})
+        end
+      end
+
+      local function lsp_implementation()
+        local success, err = pcall(vim.lsp.buf.implementation)
+        if not success then
+          vim.api.nvim_echo({{"LSP implementation ERROR: " .. tostring(err)}}, true, {})
+        end
+      end
+
+      local function lsp_hover()
+        local success, err = pcall(vim.lsp.buf.hover)
+        if not success then
+          vim.api.nvim_echo({{"LSP hover ERROR: " .. tostring(err)}}, true, {})
+        end
+      end
+
+      local function lsp_signature_help()
+        local success, err = pcall(vim.lsp.buf.signature_help)
+        if not success then
+          vim.api.nvim_echo({{"LSP signature help ERROR: " .. tostring(err)}}, true, {})
+        end
+      end
+
+      -- 设置键映射
+      vim.keymap.set('n', '<C-i>', lsp_definition, opts)   -- 改为使用<C-i>进行定义跳转
+      vim.keymap.set('n', 'gr', lsp_references, opts)
+      vim.keymap.set('n', 'gi', lsp_implementation, opts)
+      vim.keymap.set('n', 'K', lsp_hover, opts)
+      vim.keymap.set('n', '<C-k>', lsp_signature_help, opts)
+
+      -- Telescope integration (修改<C-d>使用lsp_implementations而不是lsp_definitions)
+      vim.keymap.set('n', '<C-d>', ':Telescope lsp_implementations<CR>', opts)  -- 改为使用实现
+      vim.keymap.set('n', '<C-r>', ':Telescope lsp_references<CR>', opts)
+      vim.keymap.set('n', '<C-e>', ':Telescope lsp_implementations<CR>', opts)  -- 原来<C-p>的功能改为<C-e>
+      vim.keymap.set('n', '<C-t>', ':Telescope lsp_type_definitions<CR>', opts)
+      vim.keymap.set('n', '<C-s>', ':Telescope lsp_document_symbols<CR>', opts)
+    end
+
+    -- 确保在初始化mason-lspconfig之前，Mason已经设置完毕
+    require('mason-lspconfig').setup {
+      ensure_installed = { 'clangd' },
+      handlers = {
+        -- Specialized handler for clangd with configurations optimized for startup
+        ['clangd'] = function ()
+          require('lspconfig').clangd.setup {
+            on_attach = function(client, bufnr)
+              -- 最简化初始化，减少启动操作
+              on_attach(client, bufnr)
+            end,
+            capabilities = capabilities,
+            -- 避免启动时立即执行复杂任务，但保持基本功能
+            cmd = {
+              'clangd',
+              '--background-index=false',  -- 延迟索引，避免启动负担
+              '--clang-tidy=false',        -- 禁用clang-tidy在初始化时
+              '--completion-style=detailed',
+              '--function-arg-placeholders=false',  -- Disable placeholders that may interfere with workflow
+              '--fallback-style=google',
+              '--pch-storage=memory',      -- 使用内存存储预编译头
+              '--index=background',        -- 背景索引改为轻量级
+              '--jthreads=1',              -- 降低线程使用
+            },
+          }
+        end,
+        -- Default handler for other servers
+        function(server_name)
+          if server_name ~= 'clangd' then
+            require('lspconfig')[server_name].setup {
+              on_attach = on_attach,
+              capabilities = capabilities,
+            }
+          end
+        end,
+      },
+    }
+  end,
+}
