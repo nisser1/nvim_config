@@ -27,6 +27,9 @@ vim.opt.mouse = "iv" --只有普通模式可以用鼠标copy内容，insert和vi
 -- ==============================
 -- 2. 加载自定义配置模块 
 -- ==============================
+-- 基础配置：基本编辑设置（搜索高亮、行号、缩进等）
+require("config.basic")
+
 -- 诊断配置：控制LSP错误/警告标记的显示（E/W等）
 -- 默认禁用显示标记，但仍保持LSP功能（如自动补全、跳转定义等）
 -- 可通过命令临时切换：:DiagnosticsEnable/:DiagnosticsDisable/:DiagnosticsToggle
