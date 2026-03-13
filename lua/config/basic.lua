@@ -19,9 +19,8 @@ M.setup = function()
   
   -- Color and display settings
   vim.opt.syntax = "enable"  -- Enable syntax highlighting
-  vim.g.gruvbox_contrast_dark = "hard"  -- Set gruvbox theme contrast
-  vim.opt.background = "dark"  -- Set background to dark
-  vim.opt.t_Co = 256  -- Enable 256 color mode
+  vim.opt.background = "dark"  -- Set background to dark  
+  vim.opt.termguicolors = true  -- Enable true color support (modern replacement for t_Co)
   
   -- Indentation settings
   vim.opt.tabstop = 4       -- Number of spaces that a tab counts for
