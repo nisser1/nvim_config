@@ -1,97 +1,49 @@
 return {
-  'none/none.nvim',
-  enabled = false,  -- 一个虚拟插件用于配置ctags
+  'ludovicchabant/vim-gutentags',  -- 现在启用gtags和gtags-cscope功能替代LSP
+  enabled = true,
   config = function()
-    -- 以下是 ctags 和 gtags 配置，现在为了禁用而注释掉
-    -- 
-    -- -- ctags 基础
-    -- vim.opt.tags = { "./tags", "tags", "/etc/tags", "~/.tags" }
-    -- vim.opt.tagrelative = true
-    -- vim.opt.autochdir = false
-    -- vim.opt.ignorecase = true
-    -- vim.opt.smartcase = true
-    --
-    -- -- gtags 基础
-    -- vim.g.gtags_mode = "nomain"
-    -- vim.g.gtags_auto_set_keymap = 0 -- 禁用 gtags 自带快捷键，避免冲突
-    --
-    -- --------------------------
-    -- -- 2. 常规快捷键（彻底区分 ctags/gtags）
-    -- --------------------------
-    -- local opts = { noremap = true, silent = true }
-    --
-    -- -- ====== ctags 快捷键（Vim 原生常规：Ctrl+] 系列） ======
-    -- vim.keymap.set("n", "<C-]>", ":tag <C-R>=expand('<cword>')<CR><CR>", opts)        -- Ctrl+] 跳转到定义（ctags）
-    -- vim.keymap.set("n", "<C-\\>", ":tselect <C-R>=expand('<cword>')<CR><CR>", opts)   -- Ctrl+\ 列出所有标签（ctags）
-    -- vim.keymap.set("n", "]t", ":tnext<CR>", opts)                                     -- ]t 下一个标签（ctags）
-    -- vim.keymap.set("n", "[t", ":tprev<CR>", opts)                                     -- [t 上一个标签（ctags）
-    -- vim.keymap.set("n", "pt", ":ptag <C-R>=expand('<cword>')<CR><CR>", opts)          -- pt 预览标签定义（ctags）
-    --
-    -- -- ====== gtags 快捷键（社区常规：Leader+g 系列，\ 是默认 Leader） ======
-    -- vim.keymap.set("n", "<leader>gd", ":Gtags <C-R>=expand('<cword>')<CR><CR>", opts) -- \gd 跳转到定义（gtags）
-    -- vim.keymap.set("n", "<leader>gr", ":Gtags -r <C-R>=expand('<cword>')<CR><CR>", opts)-- \gr 查看引用（gtags）
-    -- vim.keymap.set("n", "<leader>gn", ":lnext<CR>", opts)                             -- \gn 下一个引用/定义（gtags）
-    -- vim.keymap.set("n", "<leader>gp", ":lprev<CR>", opts)                             -- \gp 上一个引用/定义（gtags）
-    -- vim.keymap.set("n", "<leader>gl", ":lclose<CR>", opts)                            -- \gl 关闭 gtags 列表窗口
-    --
-    -- -- ====== 通用回退键（所有跳转都能用） ======
-    -- vim.keymap.set("n", "<C-t>", "<C-o>", opts)                                        -- Ctrl+t 回退到上一位置（万能）
-    --
-    -- --------------------------
-    -- -- 3. 自动/手动生成标签
-    -- --------------------------
-    -- -- 自动生成 ctags（打开代码文件时）
-    -- local function auto_generate_tags()
-    --   local cwd = vim.fn.getcwd()
-    --   if cwd == "/" or cwd == vim.fn.expand("~") then return end
-    --
-    --   local tags_path = cwd .. "/tags"
-    --   if vim.fn.filereadable(tags_path) == 1 then return end
-    --
-    --   local code_files = vim.fn.glob(cwd .. "/{*.c,*.h,*.cpp,*.hpp,*.go,*.lua}", false, true)
-    --   if #code_files == 0 then return end
-    --
-    --   vim.notify("[CTAGS] Generating tags file...", vim.log.levels.INFO)
-    --   vim.fn.jobstart({
-    --     "ctags", "-R", "--fields=+aimS", "--extra=+q", 
-    --     "--exclude=.git", "--exclude=build", "--exclude=*.o", "--exclude=node_modules", ".",
-    --   }, {
-    --     cwd = cwd,
-    --     on_exit = function(_, exit_code)
-    --       if exit_code == 0 then
-    --         vim.notify("[CTAGS] Tags file generated successfully!", vim.log.levels.INFO)
-    --       else
-    --         vim.notify("[CTAGS] Failed to generate tags (check ctags install)", vim.log.levels.ERROR)
-    --       end
-    --     end
-    --   })
-    -- end
-    --
-    -- vim.api.nvim_create_autocmd("BufEnter", {
-    --   pattern = { "*.c", "*.h", "*.cpp", "*.hpp", "*.go", "*.lua" },
-    --   callback = function()
-    --     vim.defer_fn(auto_generate_tags, 300)
-    --   end,
-    --   desc = "Auto generate ctags when opening code files",
-    -- })
-    --
-    -- -- 手动生成命令
-    -- vim.api.nvim_create_user_command("GenTags", function()
-    --   local ok, _ = pcall(vim.cmd, "silent !ctags -R --fields=+aimS --extra=+q --exclude=.git .")
-    --   if ok then
-    --     vim.notify("Tags generated!", vim.log.levels.INFO)
-    --   else
-    --     vim.notify("GenTags failed (check ctags install)", vim.log.levels.ERROR)
-    --   end
-    -- end, { desc = "Generate ctags file" })
-    --
-    -- vim.api.nvim_create_user_command("GenGTags", function()
-    --   local ok, _ = pcall(vim.cmd, "silent !gtags")
-    --   if ok then
-    --     vim.notify("Global tags generated!", vim.log.levels.INFO)
-    --   else
-    --     vim.notify("GenGTags failed (check global install)", vim.log.levels.ERROR)
-    --   end
-    -- end, { desc = "Generate gtags file" })
+    -- 启用 cscope 和 gtags 设置
+    vim.g.gutentags_modules = {
+      'ctags',
+      'gtags_cscope',  -- 启用gtags-cscope作为模块
+      'gtags'
+    }
+
+    -- 配置 gutentags 缓存目录
+    vim.g.gutentags_cache_dir = vim.fn.expand('~/.cache/tags')
+
+    -- 配置 ctags/Gtags 参数
+    vim.g.gutentags_ctags_extra_args = {
+      '--fields=+iazsS',  -- 扩展字段
+      '--extra=+q',       -- 包含类/空间限定的标签
+      '--c++-kinds=+px',  -- 包含额外的C++种类
+      '--c-kinds=+px'     -- 包含额外的C种类
+    }
+
+    -- 启用 gtags 数据库自动添加
+    vim.g.gutentags_auto_add_gtags_cscope = 1
+    vim.g.gutentags_auto_add_gtags = 1
+
+    -- 为 gtags 设置映射
+    local opts = { noremap = true, silent = true }
+
+    -- 启用 vim 本地标签映射以与 gtags 协作
+    vim.keymap.set("n", "<C-]>", ":tag <C-R>=expand('<cword>')<CR><CR>", opts)
+    vim.keymap.set("n", "<C-\\>", ":tselect <C-R>=expand('<cword>')<CR><CR>", opts)
+    vim.keymap.set("n", "]t", ":tnext<CR>", opts)
+    vim.keymap.set("n", "[t", ":tprev<CR>", opts)
+
+    -- 启用gtags映射
+    vim.keymap.set("n", "<leader>gd", ":Gtags -d <C-r>=expand('<cword>')<CR><CR>", opts) -- 跳转到定义
+    vim.keymap.set("n", "<leader>gr", ":Gtags -r <C-r>=expand('<cword>')<CR><CR>", opts) -- 查看引用
+    vim.keymap.set("n", "<leader>gS", ":Gtags -s <C-r>=expand('<cword>')<CR><CR>", opts) -- 查找符号
+    vim.keymap.set("n", "<leader>gf", ":Gtags -f <C-r>=expand('<cword>')<CR><CR>", opts) -- 查找文件
+    vim.keymap.set("n", "<leader>gi", ":Gtags -gi<C-r>=expand('<cword>')<CR><CR>", opts) -- 查找导入
+    vim.keymap.set("n", "<leader>gl", ":copen<CR>", opts)                                   -- 打开位置列表
+    vim.keymap.set("n", "<leader>g]", ":cnext<CR>", opts)                                    -- 下一个结果
+    vim.keymap.set("n", "<leader>g[", ":cprev<CR>", opts)                                    -- 上一个结果
+
+    -- 通用后退功能
+    vim.keymap.set("n", "<C-t>", "<C-o>", opts)  -- 回退到上次位置
   end
 }
