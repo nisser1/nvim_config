@@ -5,10 +5,17 @@ local M = {}
 
 -- Initialize the basic configuration
 M.setup = function()
+  -- Number column settings
+  vim.opt.number = true              -- Show absolute line numbers
+  vim.opt.relativenumber = false     -- Don't show relative line numbers (standard number display)
+
+  -- Advanced number column settings
+  vim.opt.numberwidth = 4            -- Set number column width (default is 4) 
+  vim.opt.signcolumn = "yes"         -- Always show sign column to prevent shifting
+
   -- Basic editor settings from .vimrc
-  vim.opt.hlsearch = true    -- Highlight search results
-  vim.opt.number = true      -- Show line numbers
-  vim.opt.relativenumber = false  -- Don't show relative line numbers (standard number display)
+  vim.opt.hlsearch = true            -- Highlight search results
+  vim.opt.wrap = false               -- Don't wrap lines
   
   -- Color and display settings
   vim.opt.syntax = "enable"  -- Enable syntax highlighting
