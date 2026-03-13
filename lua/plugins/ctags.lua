@@ -25,18 +25,53 @@ return {
     -- 为 gtags 设置键盘映射
     local opts = { noremap = true, silent = true }
 
+    -- 定义辅助函数以检查gtags是否存在
+    local function check_gtags_and_run(cmd)
+      local gtags_available = vim.fn.executable('gtags') == 1
+      local gtags_files_exist =
+        vim.fn.filereadable('GTAGS') == 1 and
+        vim.fn.filereadable('GRTAGS') == 1 and
+        vim.fn.filereadable('GPATH') == 1
+
+      if not gtags_available then
+        vim.api.nvim_err_writeln('gtags command not available. Install gnu-global package.')
+        return
+      end
+      
+      if not gtags_files_exist then
+        vim.api.nvim_err_writeln('GTAGS files not found. Run :GenGTags to generate them first.')
+        return
+      end
+      
+      -- 执行原命令
+      vim.cmd(cmd)
+    end
+
     -- 启用gtags专用映射
-    vim.keymap.set("n", "<leader>gd", ":Gtags -d <C-r>=expand('<cword>')<CR><CR>", opts) -- 跳转到定义
-    vim.keymap.set("n", "<leader>gr", ":Gtags -r <C-r>=expand('<cword>')<CR><CR>", opts) -- 查看引用
-    vim.keymap.set("n", "<leader>gS", ":Gtags -s <C-r>=expand('<cword>')<CR><CR>", opts) -- 查找符号
-    vim.keymap.set("n", "<leader>gf", ":Gtags -f <C-r>=expand('<cword>')<CR><CR>", opts) -- 查找文件
-    vim.keymap.set("n", "<leader>gi", ":Gtags -gi<C-r>=expand('<cword>')<CR><CR>", opts) -- 查找导入
-    vim.keymap.set("n", "<leader>gl", ":lopen<CR>", opts)                                  -- 打开位置列表
-    vim.keymap.set("n", "<leader>g]", ":lnext<CR>", opts)                                  -- 下一个结果
-    vim.keymap.set("n", "<leader>g[", ":lprev<CR>", opts)                                  -- 上一个结果
+    vim.keymap.set("n", "<leader>gd", function() check_gtags_and_run(":Gtags -d " .. vim.fn.expand('<cword>')) end, opts) -- 跳转到定义
+    vim.keymap.set("n", "<leader>gr", function() check_gtags_and_run(":Gtags -r " .. vim.fn.expand('<cword>')) end, opts) -- 查看引用
+    vim.keymap.set("n", "<leader>gS", function() check_gtags_and_run(":Gtags -s " .. vim.fn.expand('<cword>')) end, opts) -- 查找符号
+    vim.keymap.set("n", "<leader>gf", function() check_gtags_and_run(":Gtags -f " .. vim.fn.expand('<cword>')) end, opts) -- 查找文件
+    vim.keymap.set("n", "<leader>gi", function() check_gtags_and_run(":Gtags -gi " .. vim.fn.expand('<cword>')) end, opts) -- 查找导入
+    vim.keymap.set("n", "<leader>gl", ":lopen<CR>", opts)                                -- 打开位置列表
+    vim.keymap.set("n", "<leader>g]", ":lnext<CR>", opts)                               -- 下一个结果
+    vim.keymap.set("n", "<leader>g[", ":lprev<CR>", opts)                               -- 上一个结果
+
 
     -- 通用后退功能
     vim.keymap.set("n", "<C-t>", "<C-o>", opts)  -- 回退到上次位置
+
+    -- 自定义辅助函数，检查gtags相关命令的可用性
+    local function is_gtags_available()
+      local gtags_exec = vim.fn.executable('gtags') == 1
+      local global_exec = vim.fn.executable('global') == 1
+      local gt = vim.fn.filereadable('./GTAGS') == 1
+      local gr = vim.fn.filereadable('./GRTAGS') == 1
+      local gp = vim.fn.filereadable('./GPATH') == 1
+      
+      -- 确保有gtags可执行文件和GTAGS/GRTAGS/GPATH文件存在
+      return gtags_exec == 1 and global_exec == 1 and gt == 1 and gr == 1 and gp == 1
+    end
 
     -- 自动检查并生成gtags文件的函数
     local function check_and_generate_gtags()
@@ -62,8 +97,7 @@ return {
               on_exit = function(_, exit_code, _)
                 if exit_code == 0 then
                   vim.notify("GTAGS files generated successfully!", vim.log.levels.INFO)
-                  -- 重新附加gtags数据库以使用新的符号数据库
-                  vim.cmd("silent! Gtags -d")
+                  -- 现在不需要手动重新附加上下文，vim-gutentags会自动处理
                 else
                   vim.notify("Failed to generate GTAGS (install gnu-global first)", vim.log.levels.WARN)
                 end
@@ -106,5 +140,20 @@ return {
         end
       })
     end, { desc = "Manually generate gtags in current directory" })
+    
+    -- 添加一个命令来测试gtags是否可用
+    vim.api.nvim_create_user_command("GtagsStatus", function()
+      local gtags_exec = vim.fn.executable('gtags') == 1
+      local global_exec = vim.fn.executable('global') == 1
+      local gt = vim.fn.filereadable('./GTAGS') == 1
+      local gr = vim.fn.filereadable('./GRTAGS') == 1
+      local gp = vim.fn.filereadable('./GPATH') == 1
+      
+      vim.notify(
+        "gtags executable: " .. (gtags_exec and "✓" or "✗") .. " global executable: " .. (global_exec and "✓" or "✗") ..
+        "\nGTAGS file: " .. (gt and "✓" or "✗") .. " GRTAGS file: " .. (gr and "✓" or "✗") .. " GPATH file: " .. (gp and "✓" or "✗"),
+        vim.log.levels.INFO
+      )
+    end, { desc = "Check gtags availability" })
   end
 }
