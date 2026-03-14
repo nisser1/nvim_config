@@ -38,6 +38,20 @@ vim.opt.shiftwidth = 4    -- Number of spaces to use for each step of (auto)inde
 vim.opt.list = true       -- Show whitespace characters
 vim.opt.listchars = {tab = '▸ ', space = '·'}  -- Characters to show for whitespace
 
+vim.opt.mousemoveevent = true
+
+vim.opt.guicursor = {
+  "n-v-c:block-Cursor/lCursor",
+  "i-ci-ve:ver25-Cursor/lCursor",
+  "r-cr:hor20-Cursor/lCursor",
+  "a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor",
+}
+
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to bottom window" })
+vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to top window" })
+
 local M = {}
 
 return M

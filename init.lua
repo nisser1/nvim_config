@@ -22,7 +22,7 @@ end
 -- 把 Lazy.nvim 加入 runtimepath
 vim.opt.rtp:prepend(lazypath)
 vim.opt.clipboard = 'unnamedplus' --可以和当前系统交互
-vim.opt.mouse = "iv" --只有普通模式可以用鼠标copy内容，insert和visual模式不可以
+vim.opt.mouse = "niv" --普通、插入、可视模式都可以用鼠标
 
 -- ==============================
 -- 2. 加载自定义配置模块 
