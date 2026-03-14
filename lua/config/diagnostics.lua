@@ -36,7 +36,6 @@ M.disable_diagnostics = function()
   M.current_config.signs = false
   M.current_config.underline = false
   M.current_config.update_in_insert = false
-  print("诊断显示已禁用：E/W等标记已隐藏")
 end
 
 ---启用诊断显示（显示E/W等标记）
