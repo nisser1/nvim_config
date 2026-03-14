@@ -102,7 +102,8 @@ return {
       if #qflist == 1 then
         vim.cmd('cfirst')
       else
-        vim.cmd('copen')
+        vim.cmd('botright copen')
+        vim.keymap.set('n', '<CR>', '<CR>:cclose<CR>', { buffer = true, silent = true })
         vim.notify(string.format("Found %d results", #qflist), vim.log.levels.INFO)
       end
     end
