@@ -1,162 +1,209 @@
+-- 纯gtags配置（不依赖vim-gutentags模块）
+-- 直接使用global命令进行代码导航
 return {
-  'ludovicchabant/vim-gutentags',  -- 启用gtags功能
+  'ludovicchabant/vim-gutentags',
   enabled = true,
   config = function()
-    -- 启用gtags和gtags-cscope设置（只启用gtags相关模块）
-    vim.g.gutentags_modules = {
-      'gtags_cscope',  -- 启用gtags-cscope作为模块
-      'gtags'          -- 同时启用gtags功能
-    }
-
-    -- 配置 gutentags 缓存目录
-    vim.g.gutentags_cache_dir = vim.fn.expand('~/.cache/tags')
-
-    -- 不配置ctags参数，仅针对gtags
-    vim.g.gutentags_allowed_file_types = {
-      '.c', '.cpp', '.h', '.hpp', '.java', 
-      '.py', '.js', '.ts', '.go', '.rs', 
-      '.lua', '.php', '.rb'
-    }
-
-    -- 启用 gtags 数据库自动添加
-    vim.g.gutentags_auto_add_gtags_cscope = 1
-    vim.g.gutentags_auto_add_gtags = 1
-
-    -- 为 gtags 设置键盘映射
-    local opts = { noremap = true, silent = true }
-
-    -- 定义辅助函数以检查gtags是否存在，并安全执行命令
-    local function check_gtags_and_run(cmd_suffix)
-      local gtags_available = vim.fn.executable('gtags') == 1
-      local gtags_files_exist =
-        vim.fn.filereadable('GTAGS') == 1 and
-        vim.fn.filereadable('GRTAGS') == 1 and
-        vim.fn.filereadable('GPATH') == 1
-
-      if not gtags_available then
-        vim.api.nvim_err_writeln('gtags command not available. Install gnu-global package.')
-        return
+    -- 不使用任何gutentags模块，我们手动处理gtags
+    vim.g.gutentags_enabled = 0  -- 禁用gutentags自动功能
+    
+    -- =====================================
+    -- 核心查询函数
+    -- =====================================
+    
+    -- 查找项目根目录（GTAGS所在位置）
+    local function find_gtags_root()
+      local current = vim.fn.expand('%:p:h')
+      while current ~= '/' and current ~= '' do
+        if vim.fn.filereadable(current .. '/GTAGS') == 1 then
+          return current
+        end
+        current = vim.fn.fnamemodify(current, ':h')
       end
-      
-      if not gtags_files_exist then
-        vim.api.nvim_err_writeln('GTAGS files not found. Run :GenGTags to generate them first.')
-        return
-      end
-      
-      local cword = vim.fn.expand('<cword>')
-      
-      -- 执行原命令
-      local full_cmd = ":Gtags " .. cmd_suffix .. " " .. cword
-      vim.cmd(full_cmd)
-    end
-
-    -- 启用gtags专用映射
-    vim.keymap.set("n", "<leader>gd", function() check_gtags_and_run("-d") end, opts) -- 跳转到定义
-    vim.keymap.set("n", "<leader>gr", function() check_gtags_and_run("-r") end, opts) -- 查看引用
-    vim.keymap.set("n", "<leader>gS", function() check_gtags_and_run("-s") end, opts) -- 查找符号
-    vim.keymap.set("n", "<leader>gf", function() check_gtags_and_run("-f") end, opts) -- 查找文件
-    vim.keymap.set("n", "<leader>gi", function() check_gtags_and_run("-gi") end, opts) -- 查找导入
-    vim.keymap.set("n", "<leader>gl", ":lopen<CR>", opts)                             -- 打开位置列表
-    vim.keymap.set("n", "<leader>g]", ":lnext<CR>", opts)                            -- 下一个结果
-    vim.keymap.set("n", "<leader>g[", ":lprev<CR>", opts)                            -- 上一个结果
-
-
-    -- 通用后退功能
-    vim.keymap.set("n", "<C-t>", "<C-o>", opts)  -- 回退到上次位置
-
-    -- 自定义辅助函数，检查gtags相关命令的可用性
-    local function is_gtags_available()
-      local gtags_exec = vim.fn.executable('gtags') == 1
-      local global_exec = vim.fn.executable('global') == 1
-      local gt = vim.fn.filereadable('./GTAGS') == 1
-      local gr = vim.fn.filereadable('./GRTAGS') == 1
-      local gp = vim.fn.filereadable('./GPATH') == 1
-      
-      -- 确保有gtags可执行文件和GTAGS/GRTAGS/GPATH文件存在
-      return gtags_exec == 1 and global_exec == 1 and gt == 1 and gr == 1 and gp == 1
-    end
-
-    -- 自动检查并生成gtags文件的函数
-    local function check_and_generate_gtags()
+      -- 也检查当前工作目录
       local cwd = vim.fn.getcwd()
-      local has_git = vim.fn.isdirectory('.git') == 1 or vim.fn.finddir('.git', ';') ~= ''
+      if vim.fn.filereadable(cwd .. '/GTAGS') == 1 then
+        return cwd
+      end
+      return nil
+    end
+    
+    -- 执行global命令并返回结果
+    local function run_global(args)
+      -- 检查global命令是否存在
+      if vim.fn.executable('global') ~= 1 then
+        return nil, "global command not found. Install: sudo apt install global"
+      end
       
-      if has_git then
-        local gtags_files_exist = 
-          vim.fn.filereadable(cwd .. '/GTAGS') == 1 and
-          vim.fn.filereadable(cwd .. '/GRTAGS') == 1 and
-          vim.fn.filereadable(cwd .. '/GPATH') == 1
-        
-        if not gtags_files_exist then
-          local confirm = vim.fn.input("GTAGS files not found. Generate now? (Y/n): ")
-          
-          if confirm == "" or confirm:lower():sub(1,1) == "y" then
-            vim.notify("Generating GTAGS files...", vim.log.levels.INFO)
-            
-            vim.fn.jobstart({
-              "gtags"
-            }, {
-              cwd = cwd,
-              on_exit = function(_, exit_code, _)
-                if exit_code == 0 then
-                  vim.notify("GTAGS files generated successfully!", vim.log.levels.INFO)
-                  -- 现在不需要手动重新附加上下文，vim-gutentags会自动处理
-                else
-                  vim.notify("Failed to generate GTAGS (install gnu-global first)", vim.log.levels.WARN)
-                end
-              end
+      -- 找到GTAGS根目录
+      local root = find_gtags_root()
+      if not root then
+        return nil, "GTAGS not found. Run :GenGTags first."
+      end
+      
+      -- 执行global命令
+      local cmd = string.format('cd "%s" && global %s', root, args)
+      local output = vim.fn.systemlist(cmd)
+      
+      if vim.v.shell_error ~= 0 then
+        return nil, "global command failed"
+      end
+      
+      return output, root
+    end
+    
+    -- 解析global -x输出到quickfix格式
+    -- 输出格式: 符号名 行号 文件名 上下文
+    local function parse_to_qflist(lines, root)
+      local qflist = {}
+      for _, line in ipairs(lines) do
+        if line and line ~= '' then
+          local symbol, lnum, filename, context = line:match('^(%S+)%s+(%d+)%s+(%S+)%s*(.*)$')
+          if filename and lnum then
+            local fullpath = root .. '/' .. filename
+            table.insert(qflist, {
+              filename = fullpath,
+              lnum = tonumber(lnum),
+              text = context or '',
+              valid = 1,
             })
           end
         end
       end
+      return qflist
     end
-
-    -- 当进入Git项目中的代码文件时，检查是否存在gtags文件
-    vim.api.nvim_create_autocmd("VimEnter", {
-      callback = function()
-        -- 延迟执行，以防vim刚启动时cwd未设置好
-        vim.defer_fn(check_and_generate_gtags, 100)
-      end,
-      desc = "Check and generate gtags when opening vim in git repo"
-    })
-
-    vim.api.nvim_create_autocmd("DirChanged", {
-      callback = function()
-        check_and_generate_gtags()
-      end,
-      desc = "Check and generate gtags when changing directory"
-    })
-
-    vim.api.nvim_create_user_command("GenGTags", function()
+    
+    -- 执行gtags查询并跳转
+    local function gtags_search(args)
+      local output, result = run_global(args)
+      
+      if type(result) == 'string' and output == nil then
+        -- result是错误信息
+        vim.notify(result, vim.log.levels.WARN)
+        return
+      end
+      
+      local root = result
+      if not output or #output == 0 then
+        vim.notify("No results found", vim.log.levels.INFO)
+        return
+      end
+      
+      local qflist = parse_to_qflist(output, root)
+      
+      if #qflist == 0 then
+        vim.notify("No valid results", vim.log.levels.INFO)
+        return
+      end
+      
+      -- 设置quickfix列表
+      vim.fn.setqflist(qflist, 'r')
+      
+      if #qflist == 1 then
+        vim.cmd('cfirst')
+      else
+        vim.cmd('copen')
+        vim.notify(string.format("Found %d results", #qflist), vim.log.levels.INFO)
+      end
+    end
+    
+    -- =====================================
+    -- 键盘映射
+    -- =====================================
+    
+    local opts = { noremap = true, silent = true }
+    
+    -- ,gd - 跳转到定义
+    vim.keymap.set('n', '<leader>gd', function()
+      local cword = vim.fn.expand('<cword>')
+      if cword == '' then return end
+      gtags_search('-x -d ' .. cword)
+    end, opts)
+    
+    -- ,gr - 查找引用
+    vim.keymap.set('n', '<leader>gr', function()
+      local cword = vim.fn.expand('<cword>')
+      if cword == '' then return end
+      gtags_search('-x -r ' .. cword)
+    end, opts)
+    
+    -- ,gs - 查找符号
+    vim.keymap.set('n', '<leader>gs', function()
+      local cword = vim.fn.expand('<cword>')
+      if cword == '' then return end
+      gtags_search('-x -s ' .. cword)
+    end, opts)
+    
+    -- ,gg - grep查找
+    vim.keymap.set('n', '<leader>gg', function()
+      local cword = vim.fn.expand('<cword>')
+      if cword == '' then return end
+      gtags_search('-x -g ' .. cword)
+    end, opts)
+    
+    -- Quickfix导航
+    vim.keymap.set('n', '<leader>gl', ':copen<CR>', opts)
+    vim.keymap.set('n', '<leader>g]', ':cnext<CR>', opts)
+    vim.keymap.set('n', '<leader>g[', ':cprev<CR>', opts)
+    vim.keymap.set('n', '<leader>gq', ':cclose<CR>', opts)
+    
+    -- 后退 (使用 Ctrl+t 代替 Ctrl+o)
+    vim.keymap.set('n', '<C-t>', '<C-o>', { noremap = true, silent = true, desc = 'Jump back' })
+    -- 禁用原来的 Ctrl+o
+    vim.keymap.set('n', '<C-o>', '<Nop>', { noremap = true, silent = true })
+    
+    -- =====================================
+    -- 用户命令
+    -- =====================================
+    
+    -- 生成GTAGS
+    vim.api.nvim_create_user_command('GenGTags', function()
       local cwd = vim.fn.getcwd()
       vim.notify("Generating GTAGS in " .. cwd, vim.log.levels.INFO)
-      vim.fn.jobstart({
-        "gtags"
-      }, {
+      
+      vim.fn.jobstart('gtags', {
         cwd = cwd,
-        on_exit = function(_, exit_code, _)
-          if exit_code == 0 then
-            vim.notify("GTAGS files generated successfully!", vim.log.levels.INFO)
-          else
-            vim.notify("Failed to generate GTAGS (install gnu-global first)", vim.log.levels.WARN)
-          end
+        on_exit = function(_, code)
+          vim.schedule(function()
+            if code == 0 then
+              vim.notify("GTAGS generated!", vim.log.levels.INFO)
+            else
+              vim.notify("Failed to generate GTAGS. Install: sudo apt install global", vim.log.levels.ERROR)
+            end
+          end)
         end
       })
-    end, { desc = "Manually generate gtags in current directory" })
+    end, { desc = 'Generate GTAGS for current project' })
     
-    -- 添加一个命令来测试gtags是否可用
-    vim.api.nvim_create_user_command("GtagsStatus", function()
-      local gtags_exec = vim.fn.executable('gtags') == 1
-      local global_exec = vim.fn.executable('global') == 1
-      local gt = vim.fn.filereadable('./GTAGS') == 1
-      local gr = vim.fn.filereadable('./GRTAGS') == 1
-      local gp = vim.fn.filereadable('./GPATH') == 1
+    -- 状态检查
+    vim.api.nvim_create_user_command('GtagsStatus', function()
+      local root = find_gtags_root()
+      local lines = {}
       
-      vim.notify(
-        "gtags executable: " .. (gtags_exec and "✓" or "✗") .. " global executable: " .. (global_exec and "✓" or "✗") ..
-        "\nGTAGS file: " .. (gt and "✓" or "✗") .. " GRTAGS file: " .. (gr and "✓" or "✗") .. " GPATH file: " .. (gp and "✓" or "✗"),
-        vim.log.levels.INFO
-      )
-    end, { desc = "Check gtags availability" })
+      table.insert(lines, "=== GTAGS Status ===")
+      table.insert(lines, "global: " .. (vim.fn.executable('global') == 1 and "✓" or "✗ not found"))
+      table.insert(lines, "gtags: " .. (vim.fn.executable('gtags') == 1 and "✓" or "✗ not found"))
+      
+      if root then
+        table.insert(lines, "")
+        table.insert(lines, "Root: " .. root)
+        table.insert(lines, "GTAGS: " .. (vim.fn.filereadable(root .. '/GTAGS') == 1 and "✓" or "✗"))
+        table.insert(lines, "GRTAGS: " .. (vim.fn.filereadable(root .. '/GRTAGS') == 1 and "✓" or "✗"))
+        table.insert(lines, "GPATH: " .. (vim.fn.filereadable(root .. '/GPATH') == 1 and "✓" or "✗"))
+      else
+        table.insert(lines, "")
+        table.insert(lines, "GTAGS: ✗ not found")
+        table.insert(lines, "Run :GenGTags to generate")
+      end
+      
+      vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
+    end, { desc = 'Check GTAGS status' })
+    
+    -- 直接搜索命令
+    vim.api.nvim_create_user_command('Gtags', function(opts)
+      if opts.args and opts.args ~= '' then
+        gtags_search('-x ' .. opts.args)
+      end
+    end, { nargs = '*', desc = 'Search with GTAGS' })
   end
 }
