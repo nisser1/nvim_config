@@ -39,6 +39,7 @@ vim.opt.list = true       -- Show whitespace characters
 vim.opt.listchars = {tab = '▸ ', space = '·'}  -- Characters to show for whitespace
 
 vim.opt.mousemoveevent = true
+vim.opt.mouse = ""  -- 禁用鼠标模式，允许终端直接复制
 
 vim.opt.guicursor = {
   "n-v-c:block-Cursor/lCursor",
