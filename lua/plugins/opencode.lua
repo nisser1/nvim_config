@@ -32,6 +32,14 @@ return {
         endpoint = vim.env.OPENCODE_API_ENDPOINT or "https://dashscope.aliyuncs.com/compatible-mode/v1",
         key = vim.env.OPENCODE_API_KEY,
       },
+      -- Window config: 42% of terminal width
+      server = {
+        toggle = function()
+          require("opencode.terminal").toggle("opencode --port", {
+            width = math.floor(vim.o.columns * 0.42),
+          })
+        end,
+      },
     }
 
     vim.o.autoread = true -- 用于 `opts.events.reload`
