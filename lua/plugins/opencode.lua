@@ -144,5 +144,16 @@ return {
     vim.keymap.set("t", "<C-j>", "<C-\\><C-N><C-w>j", { desc = "Go to bottom window" })
     vim.keymap.set("t", "<C-k>", "<C-\\><C-N><C-w>k", { desc = "Go to top window" })
 
+    -- Disable Ctrl+C, Ctrl+X, Ctrl+Z in OpenCode terminal buffer
+    vim.api.nvim_create_autocmd("TermOpen", {
+      pattern = "*opencode*",
+      callback = function(event)
+        local opts = { buffer = event.buf, silent = true }
+        vim.keymap.set("t", "<C-c>", "<Nop>", opts)
+        vim.keymap.set("t", "<C-x>", "<Nop>", opts)
+        vim.keymap.set("t", "<C-z>", "<Nop>", opts)
+      end,
+    })
+
   end
 }
