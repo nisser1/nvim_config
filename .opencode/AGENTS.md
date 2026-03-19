@@ -20,6 +20,7 @@
 │       ├── gitsigns.lua        # Git 集成
 │       ├── ctags.lua           # gtags 代码导航
 │       ├── lspconfig.lua       # LSP 配置（当前禁用）
+│       ├── aerial.lua          # 符号大纲
 │       └── opencode.lua        # OpenCode 集成
 ```
 
@@ -95,6 +96,14 @@
 | `<C-x>` | 禁用（防止冲突） |
 | `<C-z>` | 禁用（防止挂起进程） |
 
+### 符号大纲 (Aerial)
+| 快捷键 | 功能 |
+|--------|------|
+| `<F2>` | 切换符号大纲窗口 |
+| `<leader>a` | 切换符号大纲窗口 |
+| `{` | 上一个符号 |
+| `}` | 下一个符号 |
+
 ## 编码规范
 
 ### 通用规则
@@ -161,6 +170,7 @@ return M
 - gitsigns Git 集成
 - gruvbox 主题 (hard contrast)
 - OpenCode AI 助手
+- aerial 符号大纲
 
 ### 已禁用
 - LSP（使用 gtags 替代）
