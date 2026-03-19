@@ -21,6 +21,7 @@
 │       ├── ctags.lua           # gtags 代码导航
 │       ├── lspconfig.lua       # LSP 配置（当前禁用）
 │       ├── aerial.lua          # 符号大纲
+│       ├── copilot.lua         # GitHub Copilot AI补全
 │       └── opencode.lua        # OpenCode 集成
 ```
 
@@ -104,6 +105,15 @@
 | `{` | 上一个符号 |
 | `}` | 下一个符号 |
 
+### GitHub Copilot
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<Tab>` | i | 接受建议 |
+| `<M-]>` | i | 下一个建议 |
+| `<M-[>` | i | 上一个建议 |
+| `<C-]>` | i | 关闭建议 |
+| `<M-CR>` | i | 打开 Copilot 面板 |
+
 ## 编码规范
 
 ### 通用规则
@@ -171,6 +181,7 @@ return M
 - gruvbox 主题 (hard contrast)
 - OpenCode AI 助手
 - aerial 符号大纲
+- GitHub Copilot AI补全
 
 ### 已禁用
 - LSP（使用 gtags 替代）
