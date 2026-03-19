@@ -11,7 +11,7 @@ M.plugins = {
   require("plugins.colorscheme"),
   require("plugins.gitsigns"),
   require("plugins.ctags"), -- 启用gtags功能
-  require("plugins.aerial"), -- 符号大纲
+  require("plugins.outline"), -- 符号大纲
   require("plugins.copilot"), -- GitHub Copilot AI补全
 }
 

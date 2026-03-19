@@ -20,7 +20,7 @@
 │       ├── gitsigns.lua        # Git 集成
 │       ├── ctags.lua           # gtags 代码导航
 │       ├── lspconfig.lua       # LSP 配置（当前禁用）
-│       ├── aerial.lua          # 符号大纲
+│       ├── outline.lua         # 符号大纲
 │       ├── copilot.lua         # GitHub Copilot AI补全
 │       └── opencode.lua        # OpenCode 集成
 ```
@@ -97,13 +97,17 @@
 | `<C-x>` | 禁用（防止冲突） |
 | `<C-z>` | 禁用（防止挂起进程） |
 
-### 符号大纲 (Aerial)
+### 符号大纲 (Outline)
 | 快捷键 | 功能 |
 |--------|------|
-| `<F2>` | 切换符号大纲窗口 |
+| `<F2>` | 切换符号大纲窗口（底部水平分割） |
 | `<leader>a` | 切换符号大纲窗口 |
-| `{` | 上一个符号 |
-| `}` | 下一个符号 |
+| `<CR>` | 跳转到符号并关闭窗口 |
+| `o` | 跳转到符号但不关闭窗口 |
+| `h` | 折叠符号 |
+| `l` | 展开符号 |
+| `<Tab>` | 切换折叠 |
+| `q` / `<Esc>` | 关闭大纲窗口 |
 
 ### GitHub Copilot
 | 快捷键 | 模式 | 功能 |
@@ -122,6 +126,7 @@
 - 注释语言：中文
 - 缩进：4 空格
 - Tab：展开为空格
+- 剪贴板：使用系统剪贴板 (`clipboard = "unnamedplus"`)
 
 ### 插件配置格式
 每个插件配置文件必须返回 lazy.nvim 规范表：
@@ -180,7 +185,7 @@ return M
 - gitsigns Git 集成
 - gruvbox 主题 (hard contrast)
 - OpenCode AI 助手
-- aerial 符号大纲
+- outline 符号大纲（底部水平分割，基于 treesitter）
 - GitHub Copilot AI补全
 
 ### 已禁用

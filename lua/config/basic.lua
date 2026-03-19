@@ -41,6 +41,9 @@ vim.opt.listchars = {tab = '▸ ', space = '·'}  -- Characters to show for whit
 vim.opt.mousemoveevent = true
 vim.opt.mouse = ""  -- 禁用鼠标模式，允许终端直接复制
 
+-- 使用系统剪贴板
+vim.opt.clipboard = "unnamedplus"
+
 vim.opt.guicursor = {
   "n-v-c:block-Cursor/lCursor",
   "i-ci-ve:ver25-Cursor/lCursor",
