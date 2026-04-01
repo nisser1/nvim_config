@@ -11,7 +11,7 @@
   "lazy.nvim": { "branch": "main", "commit": "306a05526ada86a7b30af95c5cc81ffba93fef97" },
   "nvim-cmp": { "branch": "main", "commit": "da88697d7f45d16852c6b2769dc52387d1ddc45f" },
   "nvim-treesitter": { "branch": "main", "commit": "42fc28ba918343ebfd5565147a42a26580579482" },
-  "opencode.nvim": { "branch": "main", "commit": "5067c80ee1f37b5f8a54244e184df44944175a84" },
+  "opencode.nvim": { "branch": "main", "commit": "8804ffb81f9784dcd0e9af43a2068fb55282c4dd" },
   "outline-treesitter-provider.nvim": { "branch": "main", "commit": "22dda7329cf608368cbf725effd43daf98c27f32" },
   "outline.nvim": { "branch": "main", "commit": "ead1820d49c8e79ce89cab1c2c318981b695c9d2" },
   "plenary.nvim": { "branch": "master", "commit": "b9fd5226c2f76c951fc8ed5923d85e4de065e509" },
