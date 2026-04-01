@@ -62,8 +62,9 @@ return {
         local git_dir_in_file = vim.fn.finddir('.git', file_dir .. ';')
         
         if git_dir_in_file and not git_dir_in_cwd then
+          local gitdir = vim.fn.fnamemodify(git_dir_in_file, ':p')
           vim.schedule(function()
-            gitsigns.attach(bufnr)
+            gitsigns.attach(bufnr, {gitdir = gitdir})
           end)
         end
       end,
