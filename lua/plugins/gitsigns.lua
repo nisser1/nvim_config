@@ -18,9 +18,11 @@ return {
         ignore_whitespace = false,
       },
       current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
-      current_line_blame_formatter_opts = {
-        relative_time = false,
+      watch_gitdir = {
+        enable = true,
+        follow_files = true,
       },
+      attach_to_untracked = true,
       on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
         
@@ -39,6 +41,29 @@ return {
       bg = 'NONE',
       bold = false,
       italic = true,
+    })
+    
+    vim.api.nvim_create_autocmd('BufReadPost', {
+      pattern = '*',
+      callback = function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        local file_path = vim.api.nvim_buf_get_name(bufnr)
+        
+        if file_path == '' or not vim.fn.filereadable(file_path) then
+          return
+        end
+        
+        local cwd = vim.fn.getcwd()
+        local file_dir = vim.fn.fnamemodify(file_path, ':p:h')
+        
+        local git_dir_in_cwd = vim.fn.finddir('.git', cwd .. ';')
+        local git_dir_in_file = vim.fn.finddir('.git', file_dir .. ';')
+        
+        if git_dir_in_file and not git_dir_in_cwd then
+          vim.cmd('Gitsigns attach')
+        end
+      end,
+      group = vim.api.nvim_create_augroup('GitsignsAutoAttach', { clear = true }),
     })
   end
 }
