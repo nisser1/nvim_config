@@ -10,19 +10,24 @@ return {
         topdelete    = { text = '‾' },
         changedelete = { text = '~' },
       },
+      current_line_blame = true,
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol',
+        delay = 100,
+        ignore_whitespace = false,
+      },
+      current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
       on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
-
-        -- 显示当前行的 Git 提交信息
-        vim.keymap.set('n', '<leader>gb', gs.toggle_current_line_blame, { buffer = bufnr })
-
-        -- 跳转到上一个/下一个变更
-        vim.keymap.set('n', ']c', gs.next_hunk, { buffer = bufnr })
-        vim.keymap.set('n', '[c', gs.prev_hunk, { buffer = bufnr })
-
-        -- 暂存/取消暂存 hunk
-        vim.keymap.set('n', '<leader>hs', gs.stage_hunk, { buffer = bufnr })
-        vim.keymap.set('n', '<leader>hu', gs.undo_stage_hunk, { buffer = bufnr })
+        
+        vim.keymap.set('n', '<leader>gb', gs.toggle_current_line_blame, { buffer = bufnr, desc = '切换 blame 显示' })
+        
+        vim.keymap.set('n', ']c', gs.next_hunk, { buffer = bufnr, desc = '下一个变更' })
+        vim.keymap.set('n', '[c', gs.prev_hunk, { buffer = bufnr, desc = '上一个变更' })
+        
+        vim.keymap.set('n', '<leader>hs', gs.stage_hunk, { buffer = bufnr, desc = '暂存 hunk' })
+        vim.keymap.set('n', '<leader>hu', gs.undo_stage_hunk, { buffer = bufnr, desc = '取消暂存 hunk' })
       end,
     }
   end
