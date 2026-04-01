@@ -2,7 +2,9 @@ return {
   'lewis6991/gitsigns.nvim',
   event = 'BufReadPre',
   config = function()
-    require('gitsigns').setup {
+    local gitsigns = require('gitsigns')
+    
+    gitsigns.setup {
       signs = {
         add          = { text = '+' },
         change       = { text = '~' },
@@ -60,10 +62,12 @@ return {
         local git_dir_in_file = vim.fn.finddir('.git', file_dir .. ';')
         
         if git_dir_in_file and not git_dir_in_cwd then
-          vim.cmd('Gitsigns attach')
+          vim.schedule(function()
+            gitsigns.attach(bufnr)
+          end)
         end
       end,
-      group = vim.api.nvim_create_augroup('GitsignsAutoAttach', { clear = true }),
+      group = vim.api.nvim_create_augroup('GitsignsSmartAttach', { clear = true }),
     })
   end
 }
