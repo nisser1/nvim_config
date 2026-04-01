@@ -18,6 +18,9 @@ return {
         ignore_whitespace = false,
       },
       current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+      current_line_blame_formatter_opts = {
+        relative_time = false,
+      },
       on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
         
@@ -30,5 +33,12 @@ return {
         vim.keymap.set('n', '<leader>hu', gs.undo_stage_hunk, { buffer = bufnr, desc = '取消暂存 hunk' })
       end,
     }
+    
+    vim.api.nvim_set_hl(0, 'GitSignsCurrentLineBlame', { 
+      fg = '#fabd2f',
+      bg = 'NONE',
+      bold = false,
+      italic = true,
+    })
   end
 }
