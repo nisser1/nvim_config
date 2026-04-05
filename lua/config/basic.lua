@@ -59,6 +59,42 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to top window" })
 vim.keymap.set("n", "<C-q>", "<C-v>", { desc = "Visual block mode (alternative to Ctrl-v)" })
 vim.keymap.set("v", "<C-q>", "<C-v>", { desc = "Visual block mode (alternative to Ctrl-v)" })
 
+-- Terminal buffer 智能复制（删除首尾空白和装饰字符）
+vim.api.nvim_create_autocmd({ "TermOpen", "BufEnter" }, {
+  pattern = "*",
+  callback = function()
+    if vim.bo.buftype ~= "terminal" then return end
+    local buf = vim.api.nvim_get_current_buf()
+    
+    -- 检查是否已设置过
+    if vim.b[buf].smart_yank_set then return end
+    vim.b[buf].smart_yank_set = true
+    
+    local function smart_yank(start_line, end_line)
+      local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+      
+      local trimmed_lines = {}
+      for _, line in ipairs(lines) do
+        -- 删除行首所有空白和装饰字符，直到遇到字母/数字/符号
+        local trimmed = line:gsub("^[^%w%p]*", ""):gsub("%s+$", "")
+        table.insert(trimmed_lines, trimmed)
+      end
+      
+      local result = table.concat(trimmed_lines, "\n")
+      vim.fn.setreg("+", result)
+      vim.notify("已复制 " .. #trimmed_lines .. " 行（已清理首尾空白）", vim.log.levels.INFO)
+    end
+    
+    vim.keymap.set("v", "<leader>y", function()
+      smart_yank(vim.fn.line("'<"), vim.fn.line("'>"))
+    end, { buffer = buf, silent = true })
+    
+    vim.keymap.set("n", "<leader>yy", function()
+      smart_yank(vim.fn.line("."), vim.fn.line("."))
+    end, { buffer = buf, silent = true })
+  end,
+})
+
 local M = {}
 
 return M
