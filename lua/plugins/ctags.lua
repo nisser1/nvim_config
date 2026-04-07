@@ -17,23 +17,16 @@ return {
     -- =====================================
     -- 核心查询函数
     -- =====================================
-    
-    -- 查找项目根目录（gutentags识别的项目根）
+
+    -- 查找项目根目录（使用 Neovim 内置 vim.fs.root，更可靠）
     local function find_project_root()
-      local current = vim.fn.expand('%:p:h')
-      local markers = vim.g.gutentags_project_root or { '.git', '.root', '.project' }
-      
-      while current ~= '/' and current ~= '' do
-        for _, marker in ipairs(markers) do
-          if vim.fn.isdirectory(current .. '/' .. marker) == 1 or
-             vim.fn.filereadable(current .. '/' .. marker) == 1 then
-            return current
-          end
-        end
-        current = vim.fn.fnamemodify(current, ':h')
+      -- 使用当前缓冲区路径查找包含 .git 等标记的根目录
+      local path = vim.fn.expand('%:p')
+      if path == '' or path == nil then
+        path = vim.fn.getcwd()
       end
-      
-      return vim.fn.getcwd()
+      local root = vim.fs.root(path, { '.git', '.gitignore', '.root', '.project', '.hg', '.svn' })
+      return root or vim.fn.getcwd()
     end
     
     -- 查找GTAGS数据库路径（项目目录）
@@ -180,33 +173,25 @@ return {
     
 -- 生成GTAGS（手动触发，作为gutentags的补充）
     vim.api.nvim_create_user_command('GenGTags', function(opts)
-      local target_dir = opts.args ~= '' and vim.fn.expand(opts.args) or vim.fn.getcwd()
       local project_root = find_project_root()
-      
-      vim.notify("Generating GTAGS in " .. project_root, vim.log.levels.INFO)
-      
+      -- 如果指定了目录，使用指定目录；否则使用项目根目录
+      local target_dir = opts.args ~= '' and vim.fn.expand(opts.args) or project_root
+
+      vim.notify("Generating GTAGS in " .. target_dir, vim.log.levels.INFO)
+
       local cmd
-      if vim.fn.filereadable(project_root .. '/GTAGS') == 1 then
-        cmd = string.format('cd "%s" && gtags -i', project_root)
+      if vim.fn.filereadable(target_dir .. '/GTAGS') == 1 then
+        cmd = string.format('cd "%s" && gtags -i', target_dir)
       else
-        cmd = string.format('cd "%s" && gtags', project_root)
+        cmd = string.format('cd "%s" && gtags', target_dir)
       end
-      
-      vim.notify("Generating GTAGS in " .. project_root, vim.log.levels.INFO)
-      
-      local cmd
-      if vim.fn.filereadable(project_root .. '/GTAGS') == 1 then
-        cmd = string.format('cd "%s" && gtags -i', project_root)
-      else
-        cmd = string.format('cd "%s" && gtags', project_root)
-      end
-      
+
       vim.fn.jobstart(cmd, {
-        cwd = project_root,
+        cwd = target_dir,
         on_exit = function(_, code)
           vim.schedule(function()
             if code == 0 then
-              vim.notify("GTAGS generated in " .. project_root, vim.log.levels.INFO)
+              vim.notify("GTAGS generated in " .. target_dir, vim.log.levels.INFO)
             else
               vim.notify("Failed to generate GTAGS. Install: sudo apt install global", vim.log.levels.ERROR)
             end
