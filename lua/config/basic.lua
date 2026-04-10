@@ -32,8 +32,8 @@ vim.opt.termguicolors = true  -- Enable true color support (modern replacement f
 
 -- Indentation settings
 vim.opt.tabstop = 4       -- Number of spaces that a tab counts for
-vim.opt.softtabstop = 4   -- Number of spaces that a tab counts for when editing
-vim.opt.expandtab = true  -- Expand tabs to spaces
+vim.opt.softtabstop = 0    -- Disable softtabstop (use tabstop when not expandtab)
+vim.opt.expandtab = false  -- Use real tab characters instead of spaces
 vim.opt.shiftwidth = 4    -- Number of spaces to use for each step of (auto)indent
 vim.opt.list = true       -- Show whitespace characters
 vim.opt.listchars = {tab = '▸ ', space = '·'}  -- Characters to show for whitespace
