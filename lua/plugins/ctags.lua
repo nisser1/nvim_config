@@ -55,8 +55,8 @@ return {
       end
       
       -- 设置环境变量并执行global命令
-      local env_prefix = string.format('GTAGSDBPATH=%s GTAGSROOT=%s ', db_dir, project_root)
-      local cmd = env_prefix .. string.format('global %s', args)
+      local env_prefix = string.format('GTAGSDBPATH=%s GTAGSROOT=%s ', db_dir, db_dir)
+      local cmd = env_prefix .. string.format('global --path-style=absolute %s', args)
       local output = vim.fn.systemlist(cmd)
       
       if vim.v.shell_error ~= 0 then
@@ -74,7 +74,7 @@ return {
         if line and line ~= '' then
           local symbol, lnum, filename, context = line:match('^(%S+)%s+(%d+)%s+(%S+)%s*(.*)$')
           if filename and lnum then
-            local fullpath = root .. '/' .. filename
+            local fullpath = filename
             table.insert(qflist, {
               filename = fullpath,
               lnum = tonumber(lnum),

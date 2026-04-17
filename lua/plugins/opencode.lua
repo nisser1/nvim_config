@@ -24,45 +24,13 @@ return {
     },
   },
   init = function()
-    local db_path = vim.fn.expand("~/.cc-switch/cc-switch.db")
-    local settings_path = vim.fn.expand("~/.cc-switch/settings.json")
-    
-    local handle = io.popen(string.format(
-      'python3 -c "import sqlite3,json; s=json.load(open(\'%s\')); cid=s.get(\'currentProviderClaude\',\'\'); c=sqlite3.connect(\'%s\'); r=c.execute(\'SELECT settings_config FROM providers WHERE id=?\',(cid,)).fetchone(); print(r[0] if r else \'{}\')"',
-      settings_path, db_path
-    ))
-    
-    if handle then
-      local output = handle:read("*a")
-      handle:close()
-      if output and output ~= "" then
-        local decoded = vim.json.decode(vim.trim(output))
-        local env = decoded.env or {}
-        if env.ANTHROPIC_AUTH_TOKEN then
-          vim.env.OPENCODE_API_KEY = env.ANTHROPIC_AUTH_TOKEN
-        end
-        if env.ANTHROPIC_BASE_URL then
-          local endpoint = env.ANTHROPIC_BASE_URL
-          if endpoint:match("/anthropic$") then
-            endpoint = endpoint:gsub("/anthropic$", "/v1")
-          end
-          vim.env.OPENCODE_API_ENDPOINT = endpoint
-        end
-        if env.ANTHROPIC_MODEL then
-          vim.env.OPENCODE_MODEL = env.ANTHROPIC_MODEL
-        end
-      end
-    end
+    -- 从 cc-switch 读取配置的代码已禁用，使用 ~/.config/opencode/opencode.json
   end,
   config = function()
     -- 设置 opencode.nvim 的配置
     -- 使用全局变量代替 setup() 函数
     vim.g.opencode_opts = vim.g.opencode_opts or {
-      -- OpenCode API 配置
-      api = {
-        endpoint = vim.env.OPENCODE_API_ENDPOINT,
-        key = vim.env.OPENCODE_API_KEY,
-      },
+      -- OpenCode API 配置，使用 ~/.config/opencode/opencode.json
       -- Window config: 42% of terminal width
       server = {
         toggle = function()
