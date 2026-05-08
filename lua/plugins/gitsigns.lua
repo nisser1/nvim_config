@@ -12,11 +12,11 @@ return {
         topdelete    = { text = '‾' },
         changedelete = { text = '~' },
       },
-      current_line_blame = false,
+      current_line_blame = true,
       current_line_blame_opts = {
         virt_text = true,
         virt_text_pos = 'eol',
-        delay = 300,
+        delay = 3000,
         ignore_whitespace = false,
       },
       current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
